@@ -2,7 +2,7 @@
 
 English | [正體中文](README_zh-tw.md)
 
-A robust DIY fan controller project based on the **WT32-ETH01** ESP32 board. This project allows you to control 4 PWM PC fans (in 2 groups), monitor their RPM, control a WS2812 LED strip, and monitor system temperature via Home Assistant.
+A fan controller project based on the **WT32-ETH01** ESP32 board. This project allows you to control 4 PWM PC fans (in 2 groups), monitor their RPM, control a WS2812 LED strip, and monitor system temperature via Home Assistant.
 
 <img src="img/pcb1.png" width="600">
 
