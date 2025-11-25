@@ -18,18 +18,6 @@ A fan controller project based on the **WT32-ETH01** ESP32 board. This project a
 * **Temp Monitoring**: Support for DS18B20 temperature sensor.
 * **Home Assistant Ready**: Native API integration.
 
-## 🛠 Hardware Required
-
-* **MCU**: WT32-ETH01 (ESP32 with Ethernet)
-* **Fans**: 4x 12V PWM PC Fans
-* **Sensors**: 1x DS18B20 Temperature Sensor
-* **LEDs**: WS2812 Addressable 5V LED Strip
-* **Others**:
-    * Relay Module (High/Low trigger depending on your wiring)
-    * 3x **10kΩ Resistors** (Crucial for TACH readings on Input-only pins)
-    * 4.7kΩ Resistor (Pull-up for DS18B20)
-    * 12V Power Supply (for fans) & 5V Power Supply (for ESP32/LEDs)
-
 ## 🔌 Pin Configuration (Wiring Map)
 
 | Component | Pin | Note |
