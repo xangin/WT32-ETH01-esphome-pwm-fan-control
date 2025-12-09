@@ -1,0 +1,217 @@
+substitutions:
+  led_count: 60 #更改成燈條上的燈數
+
+esphome:
+  name: fan-ctrl-wifi
+  name_add_mac_suffix: false
+  comment: WT32-ETH01 fan control
+  project:
+    name: "SimonIoT.WIFI-FAN-CONTROL"
+    version: "V4.0"
+
+
+esp32:
+  variant: ESP32
+  framework:
+    type: esp-idf
+
+#ethernet:
+#  type: LAN8720
+#  mdc_pin: GPIO23
+#  mdio_pin: GPIO18
+#  clk_mode: GPIO0_IN
+#  phy_addr: 1
+#  power_pin: GPIO16
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+  
+
+# Enable logging
+logger:
+
+
+web_server:
+  version: 3
+
+# Enable Home Assistant API
+api:
+  reboot_timeout: 0s
+
+ota:
+  - platform: esphome
+  - platform: web_server
+    
+preferences:
+  flash_write_interval: 30sec
+
+button:
+  - platform: restart
+    name: "Restart"
+
+binary_sensor:
+  - platform: status
+    name: "Status"
+
+########################################################
+# FAN power relay
+########################################################
+switch:
+  - platform: gpio
+    id: fan_power
+    icon: mdi:fan
+    name: "All Fan Power"
+    pin: GPIO14
+    restore_mode: ALWAYS_OFF
+    on_turn_on: 
+      then:
+        - fan.turn_on: manual_fan_control1
+        - fan.turn_on: manual_fan_control2
+    on_turn_off: 
+      then:
+        - fan.turn_off: manual_fan_control1
+        - fan.turn_off: manual_fan_control2        
+
+########################################################
+# LED strip
+########################################################
+# 設定 WS2812 燈條
+light:
+  - platform: esp32_rmt_led_strip
+    rgb_order: GRB  
+    pin: GPIO5
+    num_leds: $led_count
+    name: "Light Strip"
+    chipset: ws2812      
+    restore_mode: ALWAYS_OFF 
+
+output:
+########################################################
+# FAN 1 + 2
+########################################################
+  - platform: ledc
+    id: console_fan_speed1
+    pin: GPIO4
+    frequency: "25000 Hz"
+    zero_means_zero: true
+
+  - platform: template
+    id: proxy_output1
+    type: float
+    write_action:
+      lambda: |-
+        float write_val = id(manual_fan_control1).speed / 100.0;
+        id(console_fan_speed1).set_level(write_val);
+
+########################################################
+# FAN 3 + 4
+########################################################
+  - platform: ledc
+    id: console_fan_speed2
+    pin: GPIO33
+    frequency: "25000 Hz"
+    zero_means_zero: true
+
+  - platform: template
+    id: proxy_output2
+    type: float
+    write_action:
+      lambda: |-
+        float write_val = id(manual_fan_control2).speed / 100.0;
+        id(console_fan_speed2).set_level(write_val);
+
+fan:
+  - platform: speed
+    id: manual_fan_control1
+    output: proxy_output1
+    name: "Fan 1+2 Speed"
+    on_turn_on: 
+      then:
+        - switch.turn_on: fan_power
+    on_turn_off: 
+      then:
+        - switch.turn_off: fan_power        
+        
+
+  - platform: speed
+    id: manual_fan_control2
+    output: proxy_output2
+    name: "Fan 3+4 Speed"
+    on_turn_on: 
+      then:
+        - switch.turn_on: fan_power
+    on_turn_off: 
+      then:
+        - switch.turn_off: fan_power     
+
+text_sensor:
+  - platform: wifi_info
+    ip_address:
+      name: "IP Address"
+
+########################################################
+# DS18B20 temp sensor
+########################################################
+# 量測溫度用
+one_wire:
+  - platform: gpio
+    pin: GPIO15
+    
+sensor:
+  - platform: dallas_temp
+    name: "DS18B20 Temperature"
+    update_interval: 60s
+
+  - platform: internal_temperature
+    name: "ESP Temperature"
+
+  - platform: pulse_counter
+    name: "Fan 1 RPM"
+    id: "fan1_rpm"
+    unit_of_measurement: 'RPM'
+    pin:
+      number: GPIO35
+      inverted: false
+      #mode: INPUT_PULLUP        # Pull-up is required for fan tach readings
+    accuracy_decimals: 0      
+    filters:
+      - multiply: 0.5           # Most fans provide 2 pulses per rotation
+
+  - platform: pulse_counter
+    name: "Fan 2 RPM"
+    id: "fan2_rpm"
+    unit_of_measurement: 'RPM'
+    pin:
+      number: GPIO36
+      inverted: false
+      #mode: INPUT_PULLUP        # Pull-up is required for fan tach readings
+    accuracy_decimals: 0 
+    filters:
+      - multiply: 0.5           # Most fans provide 2 pulses per rotation
+
+  - platform: pulse_counter
+    name: "Fan 3 RPM"
+    id: "fan3_rpm"
+    unit_of_measurement: 'RPM'
+    pin:
+      number: GPIO39
+      inverted: false
+      #mode: INPUT_PULLUP        # Pull-up is required for fan tach readings
+    accuracy_decimals: 0 
+    filters:
+      - multiply: 0.5           # Most fans provide 2 pulses per rotation
+
+  - platform: pulse_counter
+    name: "Fan 4 RPM"
+    id: "fan4_rpm"
+    unit_of_measurement: 'RPM'
+    pin:
+      number: GPIO32
+      inverted: false
+      mode: INPUT_PULLUP        # Pull-up is required for fan tach readings
+    accuracy_decimals: 0 
+    filters:
+      - multiply: 0.5           # Most fans provide 2 pulses per rotation
+
+    
