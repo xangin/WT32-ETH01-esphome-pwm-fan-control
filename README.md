@@ -33,9 +33,6 @@ A fan controller project based on the **WT32-ETH01** ESP32 board. This project a
 | **TACH Fan 3** | **GPIO 39** | **Input Only. Requires ext. 10kΩ Pull-up** |
 | **TACH Fan 4** | GPIO 32 | Uses internal Pull-up |
 
-> **⚠️ Important Hardware Note:**
-> GPIO 35, 36, and 39 are **Input-Only** pins on the ESP32 and do not have internal pull-up resistors. Since PC Fan TACH signals are usually Open-Collector, you **MUST** add physical 10kΩ pull-up resistors (connected to 3.3V) for these three pins, otherwise RPM readings will be zero.
-
 ## ⚙️ Configuration
 
 The YAML configuration is designed to be flexible. You can customize the following variable at the top of the file:
